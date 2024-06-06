@@ -4,12 +4,12 @@ import sqlite3
 class Database():
 
     def __init__(self):
-        self.connection = sqlite3.connect(r'/mnt/d/My_Projects/Python/QAReqres' + r'/chinook.db')
+        self.connection = sqlite3.connect(r'/mnt/DATA/My_Projects/Python/QAReqres' + r'/chinook.db')
         self.cursor = self.connection.cursor()
 
 
-    def test_query(self):
-        query = "PRAGMA table_info(invoice_items)"
+    def test_query(self, table):
+        query = f"PRAGMA table_info('{table}')"
         self.cursor.execute(query)
         record = self.cursor.fetchall()
         return record        
@@ -51,3 +51,16 @@ class Database():
         record = self.cursor.fetchall()
         return record
 
+    def insert_invoice(self, invoice_id, customer_id, invoice_date, billing_address, \
+                       billing_city):
+        query = f"INSERT OR REPLACE INTO invoices (invoiceid, customerid, \
+              invoicedate, billingaddress, billingcity) \
+            VALUES ({invoice_id}, {customer_id}, '{invoice_date}', '{billing_address}', \
+                '{billing_city}')"
+        self.cursor.execute(query)
+        self.connection.commit()
+
+    def select_invoice(self, invoice_id):
+        query = f"SELECT * FROM invoices WHERE invoiceid = '{invoice_id}'"
+        self.cursor.execute(query)
+        self.connection.commit()
