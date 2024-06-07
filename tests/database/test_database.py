@@ -1,8 +1,8 @@
 import pytest
 from modules.common.database import Database
 
-#Debug test. Obtaining information about a database table
-@pytest.mark.detab
+# Debug test. Obtaining information about a database table
+@pytest.mark.datab
 def test_describe_table():
     table = 'invoices'
     db = Database()
@@ -14,14 +14,14 @@ def test_database_connection():
     db = Database()
     db.test_connection()
 
-#Test for check SELECT all customers from table customers
+# Test SELECT all customers from table customers
 @pytest.mark.database
 def test_check_all_customers():
     db = Database()
     customers = db.get_all_customers()
     assert customers[51][4] == '202 Hoxton Street'
 
-#Test for check SELECT customer's address from table customers
+# Test SELECT customer's address from table customers by name
 @pytest.mark.database
 def test_check_customer():
     name = 'Martha'
@@ -32,14 +32,14 @@ def test_check_customer():
     assert customer[0][4] == 'Halifax'
     assert customer[0][6] == 'Canada'
 
-#Test for check SELECT all items from table invoice_items
+#Test SELECT all items from table invoice_items
 @pytest.mark.database
 def test_all_invoice_items():
     db = Database()
     items = db.get_invoice_items()
     assert items[2238][0] == 2239
 
-#Test for check UPDATE field quantity table invoice_items
+#Test UPDATE field quantity in table invoice_items
 @pytest.mark.database
 def test_invoice_qnt_update():
     itemid = 2222
@@ -50,16 +50,40 @@ def test_invoice_qnt_update():
     assert db.select_invoice_quantity(itemid)[0][0] == qnt
     db.update_invoice_quantity(itemid, qnt_origin)
 
-#Test
+#Test INSERT one more record in table invoices
 @pytest.mark.database
 def test_invoice_insert():
-    invoice_id = 2222
-    customer_id = 222
-    date = '2024-06-06'
-    address = 'Baker St. 2B'
-    city = 'London'
-    db = Database()
-    db.insert_invoice(invoice_id, customer_id, date, address, city)
-    print(db.select_invoice(invoice_id))
-    #assert water_qnt[0][0] == 30
+    db = Database() 
+    invoice_id = db.select_count_table('invoices') + 1
+    customer_id = 444
+    date = '2024-06-07'
+    address = 'Andii St., 2B'
+    city = 'Kyiv'
+    country = 'Ukraine'
+    total = 99.99
+    db.insert_invoice(invoice_id, customer_id, date, address, city, country, total)
+    items = db.select_record_invoices(invoice_id)
+    assert items[0][0] == invoice_id
+    assert items[0][1] == customer_id
+    assert items[0][2] == date
+    assert items[0][3] == address
+    assert items[0][4] == city
+    assert items[0][6] == country
+    assert items[0][8] == total
+    db.delete_record_invoices(invoice_id)
 
+#Test DELETE one record in table invoices
+@pytest.mark.database
+def test_invoice_delete():
+    db = Database() 
+    invoice_id = db.select_count_table('invoices') + 1
+    customer_id = 444
+    date = '2024-06-07'
+    address = 'Andii St., 2B'
+    city = 'Kyiv'
+    country = 'Ukraine'
+    total = 99.99
+    db.insert_invoice(invoice_id, customer_id, date, address, city, country, total)
+    db.delete_record_invoices(invoice_id)
+    items = db.select_record_invoices(invoice_id)
+    assert items == []
